@@ -5,6 +5,15 @@
     <title>Title</title>
 </head>
 <body>
+<nav>
+    <ul>
+        <li><a href="#" id="latest-posts">最新投稿</a></li>
+        <li><a href="#" id="latest-dates">最新の開催日</a></li>
+        <li><a href="#" id="welcome-parties">新歓</a></li>
+        <li><a href="#" id="indoor">屋内</a></li>
+        <li><a href="#" id="outdoor">屋外</a></li>
+    </ul>
+</nav>
 <form id="myForm">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" value="phoebe"><br><br>
@@ -21,12 +30,69 @@
 <ul id="post-list"></ul>
 
 <script>
+    function filterPosts(criteria) {
+        let filteredPosts = [...data]; // Create a shallow copy of the data array
+
+        switch (criteria) {
+            case "latest-posts":
+                filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                break;
+            case "latest-dates":
+                // Sorting logic for latest dates
+                break;
+            case "welcome-parties":
+                // Filtering logic for 新歓
+                break;
+            case "indoor":
+                // Filtering logic for 屋内
+                break;
+            case "outdoor":
+                // Filtering logic for 屋外
+                break;
+            default:
+                break;
+        }
+
+        updateList(filteredPosts);
+    }
+
+    // Add event listeners to the navigation buttons
+    document.getElementById("latest-posts").addEventListener("click", (e) => {
+        e.preventDefault();
+        filterPosts("latest-posts");
+    });
+
+    document.getElementById("latest-dates").addEventListener("click", (e) => {
+        e.preventDefault();
+        // Add the sorting or filtering criteria
+        filterPosts("latest-dates");
+    });
+
+    document.getElementById("welcome-parties").addEventListener("click", (e) => {
+        e.preventDefault();
+        // Add the sorting or filtering criteria
+        filterPosts("welcome-parties");
+    });
+
+    document.getElementById("indoor").addEventListener("click", (e) => {
+        e.preventDefault();
+        // Add the sorting or filtering criteria
+        filterPosts("indoor");
+    });
+
+    document.getElementById("outdoor").addEventListener("click", (e) => {
+        e.preventDefault();
+        // Add the sorting or filtering criteria
+        filterPosts("outdoor");
+    });
+
     let data = [];
 
     async function fetchPosts() {
         try {
             const response = await fetch("/fetch-posts");
             data = await response.json();
+
             // リストの更新処理をここで行います。
             updateList(data);
         } catch (error) {
