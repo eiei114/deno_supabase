@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form id="myForm">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" value="phoebe"><br><br>
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" value="test"><br><br>
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" value="2021-10-10"><br><br>
+    <label for="description">Description:</label>
+    <textarea id="description" name="description">test</textarea><br><br>
+    <input type="hidden" id="participants" name="participants" value="0">
+    <input type="submit" value="Submit">
+</form>
+
+<ul id="post-list"></ul>
+
+<script>
+    let data = [];
+
+    async function fetchPosts() {
+        try {
+            const response = await fetch("/fetch-posts");
+            data = await response.json();
+            // リストの更新処理をここで行います。
+            updateList(data);
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+        }
+    }
+
+    function updateList(posts) {
+        const postList = document.getElementById("post-list");
+        // 既存のリストアイテムをクリアします。
+        postList.innerHTML = "";
+        // 新しいリストアイテムを追加します。
+        posts.forEach((post) => {
+            console.log(post);
+            const listItem = document.createElement("li");
+            listItem.textContent = `${post.title} by ${post.username} on ${post.date}`;
+            postList.appendChild(listItem);
+        });
+    }
+
+    // ページの読み込みが完了したら、fetchPostsを実行します。
+    window.addEventListener("load", fetchPosts);
+
+    const form = document.getElementById("myForm");
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault(); // prevent default form submission
+
+        const data = {
+            username: document.getElementById("username").value,
+            title: document.getElementById("title").value,
+            date: document.getElementById("date").value,
+            description: document.getElementById("description").value,
+        };
+
+        fetch("/register-post", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                console.log("Data submitted successfully");
+                form.reset(); // reset form after submission
+            })
+            .catch(error => console.error("Error submitting data:", error));
+    });
+</script>
+
+</body>
+</html>
