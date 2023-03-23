@@ -42,8 +42,31 @@
         posts.forEach((post) => {
             console.log(post);
             const listItem = document.createElement("li");
-            listItem.textContent = `${post.title} by ${post.username} on ${post.date}`;
+            listItem.textContent = `${post.title} by ${post.username} on ${post.date} with ${post.participants} participants`;
+            //ボタンを追加
+            const button = document.createElement("button");
+            button.textContent = "Join";
+            button.addEventListener("click", async function () {
+                // ボタンがクリックされたら、参加者数を更新します。
+                post.participants++;
+
+                await fetch("/add-participants", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(post.id)
+                })
+                    .then(response => {
+                        console.log("Data submitted successfully"+response);
+                    })
+                    .catch(error => console.error("Error submitting data:", error));
+
+                // リストの更新処理をここで行います。
+                updateList(data);
+            });
             postList.appendChild(listItem);
+            postList.appendChild(button);
         });
     }
 
@@ -70,7 +93,7 @@
             body: JSON.stringify(data)
         })
             .then(response => {
-                console.log("Data submitted successfully");
+                console.log("Data submitted successfully"+response);
                 form.reset(); // reset form after submission
             })
             .catch(error => console.error("Error submitting data:", error));

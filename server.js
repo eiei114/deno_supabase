@@ -1,12 +1,12 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
-import { serve } from "https://deno.land/std@0.138.0/http/server.ts";
-import { serveDir } from "https://deno.land/std@0.138.0/http/file_server.ts";
+import {createClient} from "https://esm.sh/@supabase/supabase-js";
+import {serve} from "https://deno.land/std@0.138.0/http/server.ts";
+import {serveDir} from "https://deno.land/std@0.138.0/http/file_server.ts";
 import "https://deno.land/std@0.167.0/dotenv/load.ts";
 
 const url = Deno.env.get("SUPABASE_URL");
 const key = Deno.env.get("SUPABASE_KEY");
 
-const supabase = createClient(url,key)
+const supabase = createClient(url, key)
 
 
 serve(async req => {
@@ -19,13 +19,16 @@ serve(async req => {
             .select('*')
 
         if (error) {
-            console.log("このエラーは"+error);
-            return new Response(JSON.stringify({ error: "An error occurred while processing your request" }), { status: 500, headers: { "content-type": "application/json" } });
+            console.log("このエラーは" + error);
+            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
+                status: 500,
+                headers: {"content-type": "application/json"}
+            });
         } else {
-            console.log("成功したかも"+JSON.stringify(data));
+            console.log("成功したかも" + JSON.stringify(data));
             //dataをJSONに変換して返す
 
-            return  new Response(JSON.stringify(data),{ headers: { "content-type": "application/json" } });
+            return new Response(JSON.stringify(data), {headers: {"content-type": "application/json"}});
         }
     }
 
@@ -34,7 +37,7 @@ serve(async req => {
     if (req.method === "POST" && pathname === "/register-post") {
         const responseData = await req.json();
         console.log(responseData.date)
-        const {data, error} = await supabase
+        const {error} = await supabase
             .from('post')
             .insert({
                 username: responseData.username,
@@ -45,12 +48,54 @@ serve(async req => {
             })
 
         if (error) {
-            console.log("このエラーは"+error);
-            return new Response(JSON.stringify({ error: "An error occurred while processing your request" }), { status: 500, headers: { "content-type": "application/json" } });
+            console.log("このエラーは" + error);
+            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
+                status: 500,
+                headers: {"content-type": "application/json"}
+            });
         } else {
-            console.log("成功したかも"+responseData.date);
+            console.log("成功したかも" + responseData.date);
 
-            return new Response(JSON.stringify(responseData),{ headers: { "content-type": "application/json" } });
+            return new Response(JSON.stringify(responseData), {headers: {"content-type": "application/json"}});
+        }
+    }
+
+    if (req.method === "POST" && pathname === "/add-participants") {
+        const responseData = await req.json();
+        console.log(responseData.date)
+
+        //参加者数を取得
+        const {participants, error1} = await supabase
+            .from('post')
+            .select('participants')
+            .eq('id', responseData.id)
+
+        if (error1) {
+            console.log("このエラーは" + error1);
+            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
+                status: 500,
+                headers: {"content-type": "application/json"}
+            });
+        }
+
+        //参加者数を1増やす
+        const {error} = await supabase
+            .from('post')
+            .update({
+                participants: participants.participants + 1
+            })
+            .eq('id', responseData.id)
+
+        if (error) {
+            console.log("このエラーは" + error);
+            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
+                status: 500,
+                headers: {"content-type": "application/json"}
+            });
+        } else {
+            console.log("成功したかも" + responseData.date);
+
+            return new Response(JSON.stringify(responseData), {headers: {"content-type": "application/json"}});
         }
     }
 
@@ -60,4 +105,5 @@ serve(async req => {
         showDirListing: true,
         enableCors: true,
     });
-});
+})
+;
