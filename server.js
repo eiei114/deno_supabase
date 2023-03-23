@@ -9,94 +9,81 @@ const key = Deno.env.get("SUPABASE_KEY");
 const supabase = createClient(url, key)
 
 
+async function fetchPosts() {
+    const { data, error } = await supabase.from('post').select('*');
+    return { data, error };
+}
+
+async function registerPost(postData) {
+    const { error } = await supabase.from('post').insert(postData);
+    return { error };
+}
+
+async function getParticipants(id) {
+    const { data: participants, error } = await supabase
+        .from('post')
+        .select('participants')
+        .eq('id', id);
+    return { participants, error };
+}
+
+async function updateParticipants(id, newCount) {
+    const { error } = await supabase
+        .from('post')
+        .update({ participants: newCount })
+        .eq('id', id);
+    return { error };
+}
+
+async function handleError(error) {
+    console.log("このエラーは" + error);
+    return new Response(JSON.stringify({ error: "An error occurred while processing your request" }), {
+        status: 500,
+        headers: { "content-type": "application/json" }
+    });
+}
+
 serve(async req => {
     const pathname = new URL(req.url).pathname;
     console.log(pathname);
 
     if (req.method === "GET" && pathname === "/fetch-posts") {
-        const {data, error} = await supabase
-            .from('post')
-            .select('*')
+        const { data, error } = await fetchPosts();
+        if (error) return handleError(error);
 
-        if (error) {
-            console.log("このエラーは" + error);
-            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
-                status: 500,
-                headers: {"content-type": "application/json"}
-            });
-        } else {
-            console.log("成功したかも" + JSON.stringify(data));
-            //dataをJSONに変換して返す
-
-            return new Response(JSON.stringify(data), {headers: {"content-type": "application/json"}});
-        }
+        console.log("成功したかも" + JSON.stringify(data));
+        return new Response(JSON.stringify(data), { headers: { "content-type": "application/json" } });
     }
 
-
-    //POSTメソッドで/register-postにアクセスした場合
     if (req.method === "POST" && pathname === "/register-post") {
-        const responseData = await req.json();
-        console.log(responseData.date)
-        const {error} = await supabase
-            .from('post')
-            .insert({
-                username: responseData.username,
-                title: responseData.title,
-                date: responseData.date,
-                description: responseData.description,
-                participants: 0
-            })
+        const requestData = await req.json();
+        const postData = {
+            username: requestData.username,
+            title: requestData.title,
+            date: requestData.date,
+            description: requestData.description,
+            participants: 0
+        };
 
-        if (error) {
-            console.log("このエラーは" + error);
-            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
-                status: 500,
-                headers: {"content-type": "application/json"}
-            });
-        } else {
-            console.log("成功したかも" + responseData.date);
+        const { error } = await registerPost(postData);
+        if (error) return handleError(error);
 
-            return new Response(JSON.stringify(responseData), {headers: {"content-type": "application/json"}});
-        }
+        console.log("成功したかも" + requestData.date);
+        return new Response(JSON.stringify(requestData), { headers: { "content-type": "application/json" } });
     }
 
     if (req.method === "POST" && pathname === "/add-participants") {
-        const responseData = await req.json();
-        console.log(responseData.date)
+        const requestData = await req.json();
 
-        //参加者数を取得
-        const {participants, error1} = await supabase
-            .from('post')
-            .select('participants')
-            .eq('id', responseData.id)
+        const { participants, error1 } = await getParticipants(requestData);
+        if (error1) return handleError(error1);
 
-        if (error1) {
-            console.log("このエラーは" + error1);
-            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
-                status: 500,
-                headers: {"content-type": "application/json"}
-            });
-        }
+        const newParticipantCount = participants[0].participants + 1;
+        const { error } = await updateParticipants(requestData, newParticipantCount);
+        if (error) return handleError(error);
 
-        //参加者数を1増やす
-        const {error} = await supabase
-            .from('post')
-            .update({
-                participants: participants.participants + 1
-            })
-            .eq('id', responseData.id)
-
-        if (error) {
-            console.log("このエラーは" + error);
-            return new Response(JSON.stringify({error: "An error occurred while processing your request"}), {
-                status: 500,
-                headers: {"content-type": "application/json"}
-            });
-        } else {
-            console.log("成功したかも" + responseData.date);
-
-            return new Response(JSON.stringify(responseData), {headers: {"content-type": "application/json"}});
-        }
+        console.log("成功したかも" + requestData);
+        return new Response(JSON.stringify(requestData), { headers: { "content-type": "application/json" } });
     }
 
     return serveDir(req, {
@@ -105,5 +92,4 @@ serve(async req => {
         showDirListing: true,
         enableCors: true,
     });
-})
-;
+});
