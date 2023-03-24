@@ -60,7 +60,7 @@ if (req.method === "POST" && pathname === "/register-post") {
 }
 ```
 
-## Update
+### Update
 ```js
 if (req.method === "POST" && pathname === "/add-participants") {
     const requestData = await req.json();
