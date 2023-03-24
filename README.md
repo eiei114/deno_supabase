@@ -7,7 +7,7 @@
 ## 準備
 
 1. GitHubのアカウントを作成
-2. SUPABASEにGitHubでログイン
+2. [Supabase](https://supabase.com/)にGitHubでログイン
 3. project test1 を作成し、SUPABASE_URL と SUPABASE_KEY を設定
 ```sh
 export SUPABASE_URL=***
