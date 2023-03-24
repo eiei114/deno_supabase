@@ -36,7 +36,7 @@ async function updateParticipants(id, newCount) {
 }
 
 async function handleError(error) {
-    console.log("このエラーは" + error);
+    console.log("このエラーは" + JSON.stringify(error, null, 2));
     return new Response(JSON.stringify({ error: "An error occurred while processing your request" }), {
         status: 500,
         headers: { "content-type": "application/json" }
