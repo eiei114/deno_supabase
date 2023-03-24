@@ -10,28 +10,28 @@ const supabase = createClient(url, key)
 
 
 async function fetchPosts() {
-    const { data, error } = await supabase.from('post').select('*');
+    const { data, error } = await supabase.from("post").select("*");
     return { data, error };
 }
 
 async function registerPost(postData) {
-    const { error } = await supabase.from('post').insert(postData);
+    const { error } = await supabase.from("post").insert(postData);
     return { error };
 }
 
 async function getParticipants(id) {
     const { data: participants, error } = await supabase
-        .from('post')
-        .select('participants')
-        .eq('id', id);
+        .from("post")
+        .select("participants")
+        .eq("id", id);
     return { participants, error };
 }
 
 async function updateParticipants(id, newCount) {
     const { error } = await supabase
-        .from('post')
+        .from("post")
         .update({ participants: newCount })
-        .eq('id', id);
+        .eq("id", id);
     return { error };
 }
 
