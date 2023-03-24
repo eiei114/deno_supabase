@@ -4,6 +4,30 @@
 - DBからデータを取得する
 - DBにデータを追加する
 
+## 準備
+
+1. GitHubのアカウントを作成
+2. SUPABASEにGitHubでログイン
+3. project test1 を作成し、SUPABASE_URL と SUPABASE_KEY を設定
+```sh
+export SUPABASE_URL=***
+export SUPABASE_KEY=***
+```
+4. table post を作成し、RLS(Row Level Security)はひとまずdisabledにする
+5. table postに、下記の項目を追加
+```
+username :text
+title :text
+date :timestamptz
+description :text
+participants :numeric
+```
+6. サーバーを起動する
+```sh
+deno run server.js
+```
+7. ブラウザで [http://localhost:8000/](http://localhost:8000/) を開く
+
 ## 使い方
 ### fetch
 ```
